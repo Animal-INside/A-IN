@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team.ain.mapper.PostMapper">
+
+    <!-- 생성 -->
+    <insert id="insertPost" parameterType="com.team.ain.dto.Post">
+        INSERT INTO post (
+            caption, 
+            location, 
+            member_id, 
+            status, 
+            created_at, 
+            updated_at
+        ) VALUES (
+            #{caption},
+            #{location},
+            #{memberId},
+            'ACTIVE',
+            NOW(),
+            NOW()
+            #{mediaUrl},
+            #{mediaType}
+        )
+    </insert>
+
+    <!-- 수정 -->
+    <update id="updatePost" parameterType="com.team.ain.dto.Post">
+        UPDATE 
+            post
+        SET 
+            caption = #{caption},
+            location = #{location}
+        WHERE 
+            id = #{id};
+    </update>
+
+    <!-- 완전삭제 -->
+    <delete id="deletePost" parameterType="long">
+        DELETE FROM 
+            post 
+        WHERE 
+            id = #{id};
+    </delete>
+
+    <!-- "삭제상태"로 변경 -->
+    <update id="softDeletePost" parameterType="long">
+        UPDATE 
+            post
+        SET 
+            status = 'DELETED'
+        WHERE 
+            id = #{id};
+    </update>
+
+    <!-- id로 게시글 조회 -->
+    <select id="getPostById" resultType="com.team.ain.dto.Post" parameterType="long">
+        SELECT
+            id,
+            member_id,
+            caption,
+            location,
+            created_at,
+            updated_at
+        FROM
+            post
+        WHERE
+            id = #{id};
+        
+    </select>
+
+    <!-- 전체 게시글 조회 -->
+    <select id="getAllPosts" resultType="com.team.ain.dto.Post">
+        SELECT
+            id,
+            member_id,
+            caption,
+            location,
+            created_at,
+            updated_at
+        FROM
+            post
+        WHERE
+            status = 'ACTIVE'
+        ORDER BY
+            created_at DESC;
+    </select>
+
+    <!-- 페이지 단위로 최신 게시글 가져오기 -->
+    <select id="getPostsByPage" resultType="com.team.ain.dto.Post">
+        SELECT 
+            id, 
+            member_id, 
+            caption, 
+            location, 
+            created_at, 
+            updated_at,
+            media_url as mediaUrl,
+            media_type as mediaType
+        FROM 
+            post
+        WHERE 
+            status = 'ACTIVE'
+        ORDER BY 
+            created_at DESC
+        LIMIT 
+            #{limit}  <!-- 한번에 가져올 게시글 개수 -->
+        OFFSET 
+            #{offset}; <!-- 스크롤 위치에 따라 스킵할 개수 -->
+</select>
+</mapper>

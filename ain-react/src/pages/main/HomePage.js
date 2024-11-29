@@ -1,6 +1,10 @@
 import React from "react";
+import InfiniteScroll from "react-infinite-scroll-component"
+import axios from "axios"
 
 // Home Page
+
+
 const HomePage = () => {
     return (
       <div className="p-4">
@@ -19,7 +23,7 @@ const HomePage = () => {
         </div>
         
         <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-2">추천 피드</h2>
+          <h2 className="text-lg font-semibold mb-2">최신 게시글</h2>
           <div className="space-y-4">
             <div className="border-b pb-4">
               <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
