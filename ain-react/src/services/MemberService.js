@@ -13,10 +13,24 @@ class MemberServiceClass {
                     'Content-Type': 'application/json',
                 }
             });
+
+            // 응답이 실패하면 에러 처리
             if (!response.ok) {
+                console.error('Error fetching member info:', response.status, response.statusText);
                 throw new Error('Failed to fetch member info');
             }
-            return await response.json();
+
+            const data = await response.json();
+
+            // pet 데이터 평탄화: 배열 안에 배열이 있을 경우 평탄화 처리
+            const pets = Array.isArray(data.pet) ? data.pet.flat() : data.pet ? [data.pet] : [];
+
+            return {
+                member: data.member,
+                pets: pets, // 평탄화된 pets 데이터
+                follows: data.follows || { follower: 0, following: 0 },
+                isFollowing: data.isFollowing || false
+            };
         } catch (error) {
             console.error('Error fetching member info:', error);
             throw error;

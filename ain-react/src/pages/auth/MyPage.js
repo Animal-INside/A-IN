@@ -7,6 +7,8 @@ import ProfileEditModal from './ProfileEditModal';
 
 
 const MyPage = () => {
+  
+
   const { logout } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,23 +25,28 @@ const MyPage = () => {
           ...authService.getAuthHeader(),
           "Content-Type": "application/json",
         };
-
+  
         const response = await fetch(`${API_BASE_URL}/api/member/my`, {
           method: "GET",
           headers,
           credentials: "include",
         });
-
+  
         if (!response.ok) throw new Error("회원 정보를 가져오는 것을 실패했습니다.");
-
+  
         const data = await response.json();
         console.log("API 응답 데이터:", data);
-
+  
         if (data.member) {
+          // 팔로우 정보가 없을 경우 빈 객체로 처리
+          const follows = data.follows || { follower: 0, following: 0 };
+  
           setMemberInfo({
             member: data.member,
-            pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []), // 배열 형태로 처리
+            pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []),
+            follows: follows,  // 팔로워, 팔로잉 정보 반영
           });
+          console.log("팔로워/팔로잉 정보:", follows);  // 팔로우 정보 출력
         } else {
           setError("회원 정보가 없습니다.");
         }
@@ -48,9 +55,10 @@ const MyPage = () => {
         setError("회원 정보를 가져오는 것을 실패했습니다.");
       }
     };
-
+  
     fetchMemberInfo();
   }, []);
+  
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -68,8 +76,8 @@ const MyPage = () => {
 
   const stats = [
     { label: "반려동물", value: memberInfo?.pets?.[0]?.length || 0 },
-    { label: "팔로워", value: 0 },
-    { label: "팔로잉", value: 0 },
+    { label: "팔로워", value: memberInfo?.follows?.follower || 0 },  // 팔로워 수 반영
+    { label: "팔로잉", value: memberInfo?.follows?.following || 0 },  // 팔로잉 수 반영
   ];
   
   
@@ -178,15 +186,23 @@ const MyPage = () => {
         {/* 프로필 정보 카드 */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-            <div className="shrink-0">
-              <div className="w-20 h-20 sm:w-36 sm:h-36 rounded-full overflow-hidden border">
-                <img
-                  className="w-full h-full object-cover"
-                  src={memberInfo?.member?.profilePictureUrl || "/api/placeholder/150/150"}
-                  alt={memberInfo?.member?.name || "사용자"}
-                />
+          <div className="shrink-0">
+          <div className="h-20 w-20 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+            {memberInfo?.member?.profilePictureUrl ? (
+              <img
+                src={memberInfo?.member?.profilePictureUrl}
+                alt={memberInfo?.member?.name || "사용자"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="text-gray-400 text-center">
+                {/* 아이콘을 텍스트로 대신 표시 */}
+                <span className="text-4xl">👤</span>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
+
             <div className="flex-1 text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-light mb-4 text-center">
                 {memberInfo?.member?.name || "사용자"} 님
@@ -238,20 +254,27 @@ const MyPage = () => {
             {memberInfo?.pets && memberInfo.pets[0]?.length > 0 ? (  // 첫 번째 배열에 접근
               memberInfo.pets[0].map((pet, index) => (  // pets[0]에 대해 map 수행
                 <div key={pet.id} className="relative pb-[100%]">
-                  <div className="absolute inset-0">
+                <div className="absolute inset-0">
+                  {pet.photoUrl ? (
                     <img
-                      src={pet.photoUrl || "/api/placeholder/300/300"}
+                      src={pet.photoUrl}
                       alt={pet.name}
                       className="w-full h-full object-cover rounded"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded">
-                      <div className="absolute bottom-0 left-0 right-0 p-3 text-white bg-gradient-to-t from-black/60 to-transparent">
-                        <p className="text-sm font-medium">{pet.name}</p>
-                        <p className="text-xs">{pet.species} | {pet.age}살</p>
-                      </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded">
+                      <span className="text-gray-400">No Photo</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded">
+                    <div className="absolute bottom-0 left-0 right-0 p-3 text-white bg-gradient-to-t from-black/60 to-transparent">
+                      <p className="text-sm font-medium">{pet.name}</p>
+                      <p className="text-xs">{pet.species} | {pet.age}살</p>
                     </div>
                   </div>
                 </div>
+              </div>
+
               ))
             ) : (
               <p className="text-center text-gray-500 col-span-3">등록된 반려동물이 없습니다.</p>

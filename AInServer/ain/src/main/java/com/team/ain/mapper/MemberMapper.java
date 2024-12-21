@@ -20,4 +20,5 @@ public interface MemberMapper {
 
     //1215 프로필업뎃
     int updateMemberProfile(Member member);
+
 }
