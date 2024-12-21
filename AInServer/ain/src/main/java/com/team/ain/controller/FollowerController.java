@@ -36,7 +36,4 @@ public class FollowerController {
         followerService.unfollow(followerId, followingId);
         return ResponseEntity.ok().build();
     }
-    
-    
-
 }

@@ -5,7 +5,6 @@ import { authService } from "../../services/authService";
 import './MyPage.css';
 import ProfileEditModal from './ProfileEditModal';
 
-
 const MyPage = () => {
   const { logout } = useAuth();
   const [error, setError] = useState("");
@@ -157,7 +156,7 @@ const MyPage = () => {
       {/* 헤더 */}
       <header className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 h-14 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">애니멀 인사이드</h1>
+          <h1 className="text-xl font-semibold">{memberInfo?.member?.name || "사용자"} 님</h1>
           <button
             onClick={handleLogout}
             disabled={loading}
@@ -178,18 +177,25 @@ const MyPage = () => {
         {/* 프로필 정보 카드 */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-            <div className="shrink-0">
-              <div className="w-20 h-20 sm:w-36 sm:h-36 rounded-full overflow-hidden border">
+          <div className="shrink-0">
+            <div className="h-20 w-20 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+              {memberInfo?.member?.profilePictureUrl ? (
                 <img
-                  className="w-full h-full object-cover"
-                  src={memberInfo?.member?.profilePictureUrl || "/api/placeholder/150/150"}
+                  src={memberInfo?.member?.profilePictureUrl}
                   alt={memberInfo?.member?.name || "사용자"}
+                  className="h-full w-full object-cover"
                 />
-              </div>
+              ) : (
+                <div className="text-gray-400 text-center">
+                  {/* 아이콘을 텍스트로 대신 표시 */}
+                  <span className="text-4xl">👤</span>
+                </div>
+              )}
             </div>
+          </div>
             <div className="flex-1 text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-light mb-4 text-center">
-                {memberInfo?.member?.name || "사용자"} 님
+                {memberInfo?.member?.email || "이메일 없음"}
               </h2>
               <div className="grid grid-cols-3 gap-4 mb-4 w-full max-w-[400px] mx-auto sm:mx-0">
                 {stats.map((stat, index) => (
@@ -207,7 +213,7 @@ const MyPage = () => {
                 </button>
               </div>
               <div className="text-sm text-center">
-                <p className="text-gray-900">{memberInfo?.member?.email || "이메일 없음"}</p>
+                <p className="text-gray-900"></p>
               </div>
             </div>
           </div>
@@ -238,19 +244,25 @@ const MyPage = () => {
             {memberInfo?.pets && memberInfo.pets[0]?.length > 0 ? (  // 첫 번째 배열에 접근
               memberInfo.pets[0].map((pet, index) => (  // pets[0]에 대해 map 수행
                 <div key={pet.id} className="relative pb-[100%]">
-                  <div className="absolute inset-0">
+                <div className="absolute inset-0">
+                  {pet.photoUrl ? (
                     <img
-                      src={pet.photoUrl || "/api/placeholder/300/300"}
+                      src={pet.photoUrl}
                       alt={pet.name}
                       className="w-full h-full object-cover rounded"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded">
-                      <div className="absolute bottom-0 left-0 right-0 p-3 text-white bg-gradient-to-t from-black/60 to-transparent">
-                        <p className="text-sm font-medium">{pet.name}</p>
-                        <p className="text-xs">{pet.species} | {pet.age}살</p>
-                      </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded">
+                      <span className="text-gray-400">No Photo</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded">
+                    <div className="absolute bottom-0 left-0 right-0 p-3 text-white bg-gradient-to-t from-black/60 to-transparent">
+                      <p className="text-sm font-medium">{pet.name}</p>
+                      <p className="text-xs">{pet.species} | {pet.age}살</p>
                     </div>
                   </div>
+                </div>
                 </div>
               ))
             ) : (
