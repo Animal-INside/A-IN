@@ -47,17 +47,21 @@ public class MemberController {
     }
     
     @GetMapping("/my")
-    public Map<String, Object> getMemberInfo(@AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
+    public Map<String, Object> getMemberInfo(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
-        Long userId = jwtTokenProvider.getMemberIdFromRequest(request);
+        Long memberId = memberService.findByEmail(email).getId(); // memberId 가져오기
 
         Map<String, Object> response = new HashMap<>();
         response.put("member", memberService.findByEmail(email));
         response.put("pet", petService.findByEmail(email));
-        response.put("follows", followerService.checkFollwers(userId));
-        response.put("isFollowing", followerService.isFollowing(userId, userId)); // 자기 자신을 팔로우하는지 확인 (필요에 따라 제거 가능)
+
+        // 팔로워/팔로잉 정보 추가
+        Map<String, Integer> followStats = followerService.checkFollwers(memberId);
+        response.put("follows", followStats);  // 팔로워와 팔로잉 수 포함
+
         return response;
     }
+
 
 
     @GetMapping("/{memberId}")

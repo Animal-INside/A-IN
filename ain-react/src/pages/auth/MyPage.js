@@ -38,6 +38,8 @@ const MyPage = () => {
           setMemberInfo({
             member: data.member,
             pets: Array.isArray(data.pets) ? data.pets : (data.pet ? [data.pet] : []), // 배열 형태로 처리
+            followers: data.follows?.follower || 0, // 팔로워 수
+            following: data.follows?.following || 0, // 팔로잉 수
           });
         } else {
           setError("회원 정보가 없습니다.");
@@ -67,8 +69,8 @@ const MyPage = () => {
 
   const stats = [
     { label: "반려동물", value: memberInfo?.pets?.[0]?.length || 0 },
-    { label: "팔로워", value: 0 },
-    { label: "팔로잉", value: 0 },
+    { label: "팔로워", value: memberInfo?.followers || 0 },
+    { label: "팔로잉", value: memberInfo?.following || 0 },
   ];
   
   
